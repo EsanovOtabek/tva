@@ -6,8 +6,8 @@ $router->add("/404","404",[
 
 $router->add("/","home",[
 	'title'=>"TVA - Transcription Video and Audio. LifePC Group",
-	"style"=>"",
-	"script"=>"<script src=\"".DR."/assets/js/plugins/chart.js\"></script>".file_get_contents("app/txt/home-script.txt"),
+	"style"=>"<script src=\"".DR."/assets/js/plugins/chart.js\"></script>",
+	"script"=>file_get_contents("app/txt/home-script.txt"),
 	"layout"=>"main"
 ]);
 

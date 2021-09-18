@@ -1,4 +1,3 @@
-	<script src="<?=DR?>/assets/js/jquery-3.3.1.min.js"></script>
 	<script src="<?=DR?>/assets/js/popper.min.js"></script>
 	<script src="<?=DR?>/assets/js/bootstrap.min.js"></script>
 	<script src="<?=DR?>/assets/js/main.js"></script>

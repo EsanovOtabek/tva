@@ -27,8 +27,8 @@ $router->add("/audio","list",[
 
 $router->add("/nutq/:id","nutq",[
 	'title'=>"TVA - Nutq",
-	"style"=>"",
-	"script"=>"",
+	"style"=>"<link href=\"https://vjs.zencdn.net/7.15.4/video-js.css\" rel=\"stylesheet\" />",
+	"script"=>"<script src=\"https://vjs.zencdn.net/7.15.4/video.min.js\"></script>",
 	"layout"=>"main"
 ]);
 

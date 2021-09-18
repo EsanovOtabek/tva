@@ -19,37 +19,37 @@ class Model
 		return mysqli_query($this->db, $sql);
 	}
 
-    public function find($sql)
-    {
-        $res = $this->query($sql);
-        return mysqli_fetch_all($res,MYSQLI_ASSOC);
-    }
-
-    public function counter($sql)
-    {
-        $res = $this->query($sql);
-        return mysqli_num_rows($res);
-    }
-
-    public function escapeString($str)
-    {
-    	return mysqli_real_escape_string($this->db,$str);
-    }
-
-    public function output($str="Error",$path="/")
-    {
-    	return "<script>alert('$str');location.href='".DR.$path."'</script>";
-    }
-    
-	public function fileUpload($file,$path,$name,$size=50000000){
-	if ($file['size']<$size&&$file['error']==0){
-		$ext=pathinfo($file['name'],PATHINFO_EXTENSION);
-		$fname=$name."-".rand().".".$ext;
-
-		return move_uploaded_file($file['tmp_name'],$path."/".$fname);
+	public function find($sql)
+	{
+		$res = $this->query($sql);
+		return mysqli_fetch_all($res,MYSQLI_ASSOC);
 	}
-	return false;
-}
+
+	public function counter($sql)
+	{
+		$res = $this->query($sql);
+		return mysqli_num_rows($res);
+	}
+
+	public function escapeString($str)
+	{
+		return mysqli_real_escape_string($this->db,$str);
+	}
+
+	public function output($str="Error",$path="/")
+	{
+		return "<script>alert('$str');location.href='".DR.$path."'</script>";
+	}
+
+	public function fileUpload($file,$path,$name,$size=50000000){
+		if ($file['size']<$size&&$file['error']==0){
+			$ext=pathinfo($file['name'],PATHINFO_EXTENSION);
+			$fname=$name.".".$ext;
+
+			return move_uploaded_file($file['tmp_name'],$path."/".$fname);
+		}
+		return false;
+	}
 }
 
 /* ======================================************======================================*/
@@ -88,27 +88,27 @@ class User extends Model
 		$error=0;
 		$out="";
 
-	    if (!preg_match("/^[a-zA-Z ]+$/",$fio)) {
-	        $error++;
-	        $out.="Name must contain only alphabets and space\\n";
-	    }
-	    if(!filter_var($email,FILTER_VALIDATE_EMAIL)) {
-	        $error++;
-	        $out.="Please Enter Valid Email ID\\n";
-	    }
-	    if(strlen($password) < 6) {
-	        $error++;
-	        $out.="Password must be minimum of 6 characters\\n";
-	    }
+		if (!preg_match("/^[a-zA-Z ]+$/",$fio)) {
+			$error++;
+			$out.="Name must contain only alphabets and space\\n";
+		}
+		if(!filter_var($email,FILTER_VALIDATE_EMAIL)) {
+			$error++;
+			$out.="Please Enter Valid Email ID\\n";
+		}
+		if(strlen($password) < 6) {
+			$error++;
+			$out.="Password must be minimum of 6 characters\\n";
+		}
 
-	    if($error == 0){
-	    	$_shrft[9]='#';
-	    	$api_key=explode("#", $_shrft)[0].rand(100,999);
+		if($error == 0){
+			$_shrft[9]='#';
+			$api_key=explode("#", $_shrft)[0].rand(100,999);
 			$res=$this->addUser($fio,$email,$password,$api_key);
 			$out=($res)?"You have successfully registered":"Auth Error";
-	    }
+		}
 
-	    return $this->output($out);
+		return $this->output($out);
 	}
 
 	public function select($params="")
@@ -128,8 +128,8 @@ class User extends Model
 	public function addUser($fio,$email,$password,$api_key="")
 	{
 		$sql = "INSERT INTO users(fio, email, password, api_key) VALUES ('$fio','$email','$password','$api_key')";
-        $res = $this->query($sql);
-        return $res;
+		$res = $this->query($sql);
+		return $res;
 	}
 
 }
@@ -156,14 +156,14 @@ class File extends Model
 		if($userid!="") $userid=" AND user_id=".$userid;
 		$sql = "SELECT * FROM files WHERE id=".$id.$userid;
 		$res = $this->query($sql);
-        return mysqli_fetch_assoc($res);
+		return mysqli_fetch_assoc($res);
 	}
 
 	public function delete($id,$userid="")
 	{
 		if($userid!="") $userid=" AND user_id=".$userid;
 		$sql = "DELETE FROM files WHERE id=".$id.$userid;
-        return $this->query($sql);
+		return $this->query($sql);
 	}
 
 	public function add($params=[],$file)
@@ -175,27 +175,55 @@ class File extends Model
 		}
 
 		$out="";		
-		$filename=$file_tip."_".time();
-		$matn=$filename;
-		$summary=$matn;
-		if($error == 0 && $this->fileUpload($file['file'],"files",$filename)){
-			$res=$this->addFile($name,$author,$filename,$language,$file_tip,$matn,$summary);
-			$out=($res)?"file uploaded":"file upload error";
-	    }else{
-	    	$out="Error";
-	    }
+		$ext=pathinfo($file['file']['name'],PATHINFO_EXTENSION);
+		$filename=$file_tip."_".time().".".$ext;
 
-	    return $this->output($out,"/output");
+		if($error == 0 && $this->fileUpload($file['file'],"files",$filename)){
+
+			require 'app/textgears.php';
+			$textgear=new TextGears();
+
+		// text auto correct
+			$matn="Bu yerga transcriptionlangan matn yoziladi.If you need a flexible setting for checking text for errors, use the custom exceptions setting. This will be especially useful for companies working with texts that are full of words from a special vocabulary. Mark words or phrases as correct so that the system stops considering them mistakes. You can also use it to allow the system to find mistakes according to the list of specific words. Custom rules can be combined and transformed into dictionaries. Such an approach makes it possible for the different functions of your product to use a different set of rules. At the same time, each user of your product can have their own set of exceptions";
+			$matn=$this->escapeString($matn);
+
+			$arr_matn=$textgear->suggest($matn);
+			$corrected_matn=$arr_matn['response']['corrected'];
+
+			$summary=$corrected_matn;
+			$summary_2 = $corrected_matn;
+
+		// python ntlk summarizer
+			require 'app/summarizer.php';
+			if(strlen($corrected_matn)>40){
+				$summary = pySummarizer($corrected_matn)['result'];
+			}
+
+		//textgears summarizer
+			$arr_summary = $textgear->summarize($corrected_matn)['response'];
+			$keywords=implode("\n", $arr_summary['keywords']);
+			$highlight=implode("\n", $arr_summary['highlight']);
+
+			if(strlen($corrected_matn)>40){
+				$summary_2=implode("\n", (array)$arr_summary['summary']);
+			}
+
+			$res=$this->addFile($name,$author,$filename,$language,$file_tip,$corrected_matn,$summary,$summary_2,$keywords,$highlight);
+			$out=($res)?"file uploaded":"file upload error";
+
+		}else{
+			$out="Error";
+		}
+
+		return $this->output($out,"/add");
 	}
 
-	public function addFile($name,$author,$file,$language,$file_tip,$matn,$summary)
+	public function addFile($name,$author,$filename,$language,$file_tip,$matn,$summary,$summary_2,$keywords,$highlight)
 	{
 		$user_id=$_SESSION['user']['id'];
-		$sql = "INSERT INTO files (name, author, file, language, file_tip, matn, summary, user_id) VALUES ('$name', '$author', '$file', '$language', '$file_tip', '$matn', '$summary', '$user_id')";
-        $res = $this->query($sql);
-        return $res;
+		$sql = "INSERT INTO files (name, author, file, language, file_tip, matn, summary, summary_2, keywords, highlight, user_id) VALUES ('$name', '$author', '$filename', '$language', '$file_tip', '$matn', '$summary','$summary_2', '$keywords', '$highlight', '$user_id')";
+		$res = $this->query($sql);
+		return $res;
 	}
-
-
 
 }

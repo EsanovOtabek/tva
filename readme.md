@@ -44,3 +44,9 @@ Gensim
 BART Transformers
 
 
+text summarizer api:
+
+	https://textgears.com/api#languages
+
+	key:	DCPPfV4fxo0eyMKv
+

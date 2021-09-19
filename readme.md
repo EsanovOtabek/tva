@@ -1,6 +1,6 @@
 Tizimning asosiy funktsional xususiyatlari: 
 
-1.Web sayt ko'rinishida tadbir  ma'lumotlarini kiritish (ma'ruza nomi, ma'ruzachi, vaqti, joyi, )  Foydalanuvchini ro'yxatdan o'tkazish, fayllarni yuklash (ovoz, matn, video) va tashqi manbalarga havolalar. 
+1. Web sayt ko'rinishida tadbir  ma'lumotlarini kiritish (ma'ruza nomi, ma'ruzachi, vaqti, joyi, )  Foydalanuvchini ro'yxatdan o'tkazish, fayllarni yuklash (ovoz, matn, video) va tashqi manbalarga havolalar. 
 
 2. Yaratilgan tadbir sahifasiga audio yoki video faylni yuklash, keyinchalik uni matnga aylantirish (transkribatsiya). Agar videofayl yuklangan bo'lsa (yoki unga havola), unda qo'shimcha manipulyatsiyaga videodan audio trekni ajratish va bundan keyin faqat u bilan ishlash kiradi. 
 
@@ -48,7 +48,6 @@ text summarizer api:
 
 	https://textgears.com/api#languages
 
-	key:	DCPPfV4fxo0eyMKv
 
 
 

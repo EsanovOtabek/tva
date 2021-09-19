@@ -1,6 +1,6 @@
 <?
 session_start();
-if($_SESSION['_shrft']==$_POST['_shrft']){
+if(!empty($_SESSION['_shrft'])&&!empty($_POST['_shrft'])){
 	require_once 'app/controllers.php';
 
 	$class=ucfirst($_POST['object']);

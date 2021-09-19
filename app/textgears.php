@@ -8,14 +8,15 @@ class TextGears
 
 	private $url="https://api.textgears.com/";
 
-	private $api_key="";
+	private $api_key="TEXTGEARS_APIKEY";
 
 	public $language="en-GB";
 
 	
-	public function __construct($api_key="DCPPfV4fxo0eyMKv")
+	public function __construct()
 	{
-		$this->api_key=$api_key;
+		require_once 'config.php';
+		$this->api_key=TEXTGEARS_APIKEY;
 	}
 
 	public function setLanguage($lang)

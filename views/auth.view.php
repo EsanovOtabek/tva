@@ -4,7 +4,7 @@
   }
   
   $params=$param;
-  $_SESSION['_shrft']=md5(time()).rand();
+  $_SESSION['_shrft'];
 ?>
 <!-- Html Head -->
 <? include_once 'include/head.php'; ?>

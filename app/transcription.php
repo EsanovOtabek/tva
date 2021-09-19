@@ -6,9 +6,15 @@
  */
 class Revai
 {
-    private $_token="02hV_qXuhImDltKJ20bpO92U-JyHDy-Uy-dE33KOB81N8VJxz2kbNc5R3dxqLVDvXifBKYGdvP3z6ZeVUTHPCebqD4rUQ";
+    private $_token="REVAI_TOKEN";
     
     private $url="https://api.rev.ai/speechtotext/v1/";
+
+    function __construct()
+    {
+        require_once 'config.php';
+        $this->_token = REVAI_TOKEN;
+    }
 
     public function jobs($media_url)
     {

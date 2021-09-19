@@ -1,59 +1,6 @@
 <?
-/**
- * 
- */
-class Model
-{
-
-	public $db;
-
-	public function __construct()
-	{
-		require_once 'config.php';
-		$db=mysqli_connect(DBHOST, DBUSER, DBPASSWORD, DBNAME) or die("DB Connection Error");
-		$this->db = $db;
-	}
-
-	public function query($sql)
-	{
-		return mysqli_query($this->db, $sql);
-	}
-
-	public function find($sql)
-	{
-		$res = $this->query($sql);
-		return mysqli_fetch_all($res,MYSQLI_ASSOC);
-	}
-
-	public function counter($sql)
-	{
-		$res = $this->query($sql);
-		return mysqli_num_rows($res);
-	}
-
-	public function escapeString($str)
-	{
-		return mysqli_real_escape_string($this->db,$str);
-	}
-
-	public function output($str="Error",$path="/")
-	{
-		return "<script>alert('$str');location.href='".DR.$path."'</script>";
-	}
-
-	public function fileUpload($file,$path,$name,$size=10000000){
-		if ($file['size']<$size&&$file['error']==0){
-			$ext=pathinfo($file['name'],PATHINFO_EXTENSION);
-			$fname=$name.".".$ext;
-
-			return move_uploaded_file($file['tmp_name'],$path."/".$fname);
-		}
-		return false;
-	}
-}
-
 /* ======================================************======================================*/
-
+require_once 'model.php';
 /**
  * 
  */
@@ -180,7 +127,7 @@ class File extends Model
 
 		if($error == 0 && $this->fileUpload($file['file'],"files",$filename)){
 
-			$file_link="https://lifepc.uz/files/".$filename;
+			$file_link="http://tva.lifepc.uz/files/video_1632052852.mp4.mp4";
 			require_once 'app/transcription.php';
 			$rev=new Revai;
 			$rev_json=json_decode($rev->jobs($file_link),true);
@@ -226,15 +173,17 @@ class File extends Model
 		$summary_2=$corrected_matn;
 
 		// python ntlk summarizer
-		require 'app/summarizer.php';
+		require_once 'summarizer.php';
 		if(strlen($corrected_matn)>40){
-			$summary = pySummarizer($corrected_matn)['result'];
+			$summary = $this->pySummarizer($corrected_matn)['result'];
+		}else{
+			$summary = $this->pySummarizer($corrected_matn)['result'];
 		}
 
 		//textgears summarizer
-		$arr_summary = $textgear->summarize($corrected_matn)['response'];
+		$arr_summary = (array)$textgear->summarize($corrected_matn)['response'];
 		$keywords=implode("\n", $arr_summary['keywords']);
-		$highlight=implode("\n", $arr_summary['highlight']);
+		$highlight=implode(" ", $arr_summary['highlight']);
 
 		if(strlen($corrected_matn)>40){
 			$summary_2=implode("\n", (array)$arr_summary['summary']);
@@ -269,7 +218,7 @@ class File extends Model
 	        }
 	        $txt.=$str[$i];
 	    }
-	    $txt=str_replace('.', '.\n', $txt);
+	    $txt=str_replace('.', '. ', $txt);
 	    return trim($txt);
 	}
 

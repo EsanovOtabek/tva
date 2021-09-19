@@ -41,7 +41,7 @@ class Model
 		return "<script>alert('$str');location.href='".DR.$path."'</script>";
 	}
 
-	public function fileUpload($file,$path,$name,$size=50000000){
+	public function fileUpload($file,$path,$name,$size=10000000){
 		if ($file['size']<$size&&$file['error']==0){
 			$ext=pathinfo($file['name'],PATHINFO_EXTENSION);
 			$fname=$name.".".$ext;
@@ -180,35 +180,14 @@ class File extends Model
 
 		if($error == 0 && $this->fileUpload($file['file'],"files",$filename)){
 
-			require 'app/textgears.php';
-			$textgear=new TextGears();
+			$file_link="https://lifepc.uz/files/".$filename;
+			require_once 'app/transcription.php';
+			$rev=new Revai;
+			$rev_json=json_decode($rev->jobs($file_link),true);
+			$rev_arr=(array)$rev_json;
+			$rev_job_id=$rev_arr['id'];
 
-		// text auto correct
-			$matn="Bu yerga transcriptionlangan matn yoziladi.If you need a flexible setting for checking text for errors, use the custom exceptions setting. This will be especially useful for companies working with texts that are full of words from a special vocabulary. Mark words or phrases as correct so that the system stops considering them mistakes. You can also use it to allow the system to find mistakes according to the list of specific words. Custom rules can be combined and transformed into dictionaries. Such an approach makes it possible for the different functions of your product to use a different set of rules. At the same time, each user of your product can have their own set of exceptions";
-			$matn=$this->escapeString($matn);
-
-			$arr_matn=$textgear->suggest($matn);
-			$corrected_matn=$arr_matn['response']['corrected'];
-
-			$summary=$corrected_matn;
-			$summary_2 = $corrected_matn;
-
-		// python ntlk summarizer
-			require 'app/summarizer.php';
-			if(strlen($corrected_matn)>40){
-				$summary = pySummarizer($corrected_matn)['result'];
-			}
-
-		//textgears summarizer
-			$arr_summary = $textgear->summarize($corrected_matn)['response'];
-			$keywords=implode("\n", $arr_summary['keywords']);
-			$highlight=implode("\n", $arr_summary['highlight']);
-
-			if(strlen($corrected_matn)>40){
-				$summary_2=implode("\n", (array)$arr_summary['summary']);
-			}
-
-			$res=$this->addFile($name,$author,$filename,$language,$file_tip,$corrected_matn,$summary,$summary_2,$keywords,$highlight);
+			$res=$this->addFile($name,$author,$filename,$language,$file_tip,$rev_job_id);
 			$out=($res)?"file uploaded":"file upload error";
 
 		}else{
@@ -218,12 +197,80 @@ class File extends Model
 		return $this->output($out,"/add");
 	}
 
-	public function addFile($name,$author,$filename,$language,$file_tip,$matn,$summary,$summary_2,$keywords,$highlight)
+	public function addFile($name,$author,$filename,$language,$file_tip,$rev_job_id)
 	{
 		$user_id=$_SESSION['user']['id'];
-		$sql = "INSERT INTO files (name, author, file, language, file_tip, matn, summary, summary_2, keywords, highlight, user_id) VALUES ('$name', '$author', '$filename', '$language', '$file_tip', '$matn', '$summary','$summary_2', '$keywords', '$highlight', '$user_id')";
+		$sql = "INSERT INTO files (name, author, file, language, file_tip, matn, rev_job_id, summary, summary_2, keywords, highlight, user_id) VALUES ('$name', '$author', '$filename', '$language', '$file_tip', 'in_progress', '$rev_job_id', 'in_progress','in_progress', 'in_progress', 'in_progress', '$user_id')";
 		$res = $this->query($sql);
 		return $res;
+	}
+
+	public function update($id,$rev_job_id)
+	{
+		$user_id=$_SESSION['user']['id'];
+
+		require_once 'app/transcription.php';
+		$rev=new Revai;
+		
+		require 'app/textgears.php';
+		$textgear=new TextGears();
+
+		$tr_matn=$rev->transcription($rev_job_id);
+		$tr_matn=$this->ubText($tr_matn);
+		$matn=$this->escapeString($tr_matn);
+
+		$arr_matn=$textgear->suggest($matn);
+		$corrected_matn=$arr_matn['response']['corrected'];
+
+		$summary=$corrected_matn;
+		$summary_2=$corrected_matn;
+
+		// python ntlk summarizer
+		require 'app/summarizer.php';
+		if(strlen($corrected_matn)>40){
+			$summary = pySummarizer($corrected_matn)['result'];
+		}
+
+		//textgears summarizer
+		$arr_summary = $textgear->summarize($corrected_matn)['response'];
+		$keywords=implode("\n", $arr_summary['keywords']);
+		$highlight=implode("\n", $arr_summary['highlight']);
+
+		if(strlen($corrected_matn)>40){
+			$summary_2=implode("\n", (array)$arr_summary['summary']);
+		}
+
+
+		$sql = "UPDATE `files` SET matn='$matn', summary='$summary', summary_2='$summary_2', keywords='$keywords', highlight='$highlight' WHERE id=$id AND user_id='$user_id'";
+		$res = $this->query($sql);
+		return $res;
+	}
+
+	public function checkRevai($rev_job_id)
+	{
+		require_once 'app/transcription.php';
+		$rev=new Revai;
+		$res=$rev->getProgress($rev_job_id);
+		$arr=(array)json_decode($res,true);
+        return $arr;
+	}
+
+	public function ubText($str)
+	{
+	    $str=str_replace("Speaker 0", " ", $str);
+	    $str=str_replace("Speaker 1", " ", $str);
+	    $str=str_replace("Speaker 2", " ", $str);
+	    $str=str_replace("Speaker 3", " ", $str);
+
+	    $txt="";
+	    for ($i=0; $i < strlen($str); $i++) { 
+	        if($str[$i]=='0'&&$str[$i+2]==':'&&$str[$i+5]==':'){
+	            $i=$i+9;
+	        }
+	        $txt.=$str[$i];
+	    }
+	    $txt=str_replace('.', '.\n', $txt);
+	    return trim($txt);
 	}
 
 }

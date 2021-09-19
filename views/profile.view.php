@@ -45,5 +45,31 @@
 				<!-- <button class="btn btn-primary" type="submit">Submit</button> -->
 			</div>
 		</div>
+		<div class="tile mb-4">
+
+			<div class="row">
+				<h2 style="margin-left: 12px;">Tva Api Docs</h2>
+				<div class="col-lg-12">
+					<hr>
+					<hr>
+
+					<h3 class="mb-3 line-head" id="nav-breadcrumbs">Api summary</h3>
+					<h4 class="text-dark">http://tva.lifepc.uz/api/v2/summary.php?key=YOUR_API_KEY</h4>
+					<br>
+					<h4><span class="text-danger">POST['text']: </span><span class="text-primary"> "Your text"</span></h4>
+				</div>
+
+				<div class="col-lg-12">
+					<hr>
+					<hr>
+
+					<h3 class="mb-3 line-head" id="nav-breadcrumbs">Api Transcription</h3>
+					<h4 class="text-dark">http://tva.lifepc.uz/api/v2/transcription.php?key=YOUR_API_KEY</h4>
+					<br>
+					<h4><span class="text-danger">POST['url']: </span><span class="text-primary"> "media url"</span></h4>
+				</div>
+			</div>
+
+		</div>
 	</div>
 </div>

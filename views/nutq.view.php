@@ -2,8 +2,8 @@
 $nutq_id=$params['id'];
 $file=new File();
 $nutq=$file->findid($nutq_id,$_SESSION['user']['id']);
-$summaryText=str_replace('.', '.', $nutq['summary']);
-$summaryText=htmlspecialchars_decode($summaryText);
+// $summaryText=str_replace('.', '.', $nutq['summary']);
+// $summaryText=htmlspecialchars_decode($summaryText);
 ?>
 <style type="text/css">
 .vjs-big-play-button{
@@ -16,7 +16,7 @@ $summaryText=htmlspecialchars_decode($summaryText);
 		<div class="tile">
 			<h3 class="tile-title"><?=$nutq['name']?></h3>
 			<div class="row">
-				<div class="col-md-8">
+				<div class="col-md-12">
 					<div class="tile-body">
 						<? if($nutq['file_tip']=='video') {?>
 						<video style="width:100%;" 
@@ -24,7 +24,7 @@ $summaryText=htmlspecialchars_decode($summaryText);
 						class="video-js"
 						controls
 						preload="auto"
-						height="333"
+						height="400"
 						data-setup="{}"
 						>
 						<source src="<?=DR."/files/".$nutq['file']?>" type="video/mp4" />
@@ -46,12 +46,18 @@ $summaryText=htmlspecialchars_decode($summaryText);
 						<?}?>
 						</div>
 					</div>
-					<div class="col-md-4"><br>
-						<h3 class="tile-title"><?=ucfirst($nutq['file_tip'])?> text Summary:</h3>						
+					<div class="col-md-12"><br><hr>
+						<h3 class="tile-title"><?=ucfirst($nutq['file_tip'])?> transcription text:
+							<select>
+								<option value="en">English</option>
+								<option value="uz">Uzbek</option>
+								<option value="ru">Russian</option>
+							</select>
+						</h3>						
 						<div class="form-group">
-							<textarea class="form-control" rows="13" readonly="" id="summaryText"><?=$summaryText?></textarea>
+							<textarea class="form-control" rows="13" readonly="" id="trText"><?=$nutq['matn']?></textarea>
 						</div>
-						<div class="tile-footer"><a class="btn btn-primary" onclick="textCopy()"><i class="fa fa-copy"></i> Summary Copy</a></div>
+						<div class="tile-footer"><a class="btn btn-primary" onclick="textCopy('trText')"><i class="fa fa-copy"></i> Text Copy</a></div>
 
 					</div>
 				</div>
@@ -63,26 +69,65 @@ $summaryText=htmlspecialchars_decode($summaryText);
 			<div class="tile">
 				<div class="row">
 					<div class="col-md-6"><br>
-						<h3 class="tile-title"><?=ucfirst($nutq['file_tip'])?> text transcription:</h3>
+						<h3 class="tile-title"><?=ucfirst($nutq['file_tip'])?> summary with NLTK: 
+							<select>
+								<option value="en">English</option>
+								<option value="uz">Uzbek</option>
+								<option value="ru">Russian</option>
+							</select>
+						</h3>
 						<hr>
 						<div class="form-group">
-							<textarea class="form-control" rows="16" readonly=""><?=$nutq['matn']?></textarea>
+							<textarea class="form-control" rows="16" readonly="" id="summary"><?=$nutq['summary']?></textarea>
 						</div>
+						<div class="tile-footer"><a class="btn btn-primary" onclick="textCopy('summary')"><i class="fa fa-copy"></i> Summary Copy</a></div>
+
+					</div>
+					<div class="col-md-6"><br>
+						<h3 class="tile-title"><?=ucfirst($nutq['file_tip'])?> summary with TextGears:
+							<select>
+								<option value="en">English</option>
+								<option value="uz">Uzbek</option>
+								<option value="ru">Russian</option>
+							</select>
+						</h3>
+						<hr>
+						<div class="form-group">
+							<textarea class="form-control" rows="16" readonly="" id="summary_2"><?=$nutq['summary_2']?></textarea>
+						</div>
+						<div class="tile-footer"><a class="btn btn-primary" onclick="textCopy('summary_2')"><i class="fa fa-copy"></i> Summary Copy</a></div>
 					</div>
 
 					<div class="col-md-6"><br>
-					
-						<h3 class="tile-title"> <?=ucfirst($nutq['file_tip'])?> text translate:  	
+						<h3 class="tile-title"><?=ucfirst($nutq['file_tip'])?> text highlight:
 							<select>
-							<option value="uz">Uzbek</option>
-							<option value="ru">Russian</option>
-							<option value="en">English</option>
-						</select></h3>
+								<option value="en">English</option>
+								<option value="uz">Uzbek</option>
+								<option value="ru">Russian</option>
+							</select>
+						</h3>
 						<hr>
 						<div class="form-group">
-							<textarea class="form-control" rows="16" readonly=""><?=$nutq['summary']?></textarea>
+							<textarea class="form-control" rows="16" readonly="" id="highlight"><?=$nutq['highlight']?></textarea>
 						</div>
+						<div class="tile-footer"><a class="btn btn-primary" onclick="textCopy('highlight')"><i class="fa fa-copy"></i> Highlight Copy</a></div>
+
 					</div>
+					<div class="col-md-6"><br>
+						<h3 class="tile-title"><?=ucfirst($nutq['file_tip'])?> text keywords:
+							<select>
+								<option value="en">English</option>
+								<option value="uz">Uzbek</option>
+								<option value="ru">Russian</option>
+							</select>
+						</h3>
+						<hr>
+						<div class="form-group">
+							<textarea class="form-control" rows="16" readonly="" id="keywords"><?=$nutq['keywords']?></textarea>
+						</div>
+						<div class="tile-footer"><a class="btn btn-primary" onclick="textCopy('keywords')"><i class="fa fa-copy"></i> Keywords Copy</a></div>
+					</div>
+
 				</div>
 			</div>
 		</div>
@@ -91,8 +136,8 @@ $summaryText=htmlspecialchars_decode($summaryText);
 	</div>
 
 <script>
-	function textCopy() {
-		 var copyText = document.getElementById("summaryText");
+	function textCopy(id) {
+		 var copyText = document.getElementById(id);
 
 		  /* Select the text field */
 		  copyText.select();

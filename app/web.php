@@ -19,7 +19,7 @@ $router->add("/video","list",[
 ]);
 
 $router->add("/audio","list",[
-	'title'=>"TVA - Videos",
+	'title'=>"TVA - Audios",
 	"style"=>"",
 	"script"=>"<script src=\"".DR."/assets/js/plugins/jquery.dataTables.min.js\"></script> <script src=\"".DR."/assets/js/plugins/dataTables.bootstrap.min.js\"></script> <script>$('#sampleTable').DataTable();</script>",
 	"layout"=>"main"

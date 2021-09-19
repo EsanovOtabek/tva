@@ -50,3 +50,9 @@ text summarizer api:
 
 	key:	DCPPfV4fxo0eyMKv
 
+
+
+ https://github.com/Uberi/speech_recognition#readme
+
+
+ rev.ai
